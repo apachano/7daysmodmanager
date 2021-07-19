@@ -26,6 +26,7 @@ class Mod:
         self.name = ""
         self.version = ""
         self.authors = []
+        self.website = ""
 
         mod_info_path = f'{self.get_library_path()}/ModInfo.xml'
         if os.path.exists(mod_info_path):
@@ -39,6 +40,8 @@ class Mod:
                     self.authors.append(element.attrib["value"])
                 elif element.tag == 'Version':
                     self.version = element.attrib["value"]
+                elif element.tag == 'Website':
+                    self.website = element.attrib["value"]
 
         for mod in os.listdir(dir_active):
             if mod[4:] == directory:

@@ -1,4 +1,5 @@
 import tkinter as tk
+import webbrowser
 from mod import get_mods, Mod
 from tk_helper import ScrollableFrame
 
@@ -11,75 +12,87 @@ def scan_library():
 
 
 def mod_manager(parent):
+
+    f_library = ScrollableFrame(parent, width=50)
+    f_library.pack(side=tk.LEFT)
+
+    f_active = ScrollableFrame(parent, width=50)
+    f_active.pack(side=tk.LEFT)
+
+    f_info = tk.Frame(parent, width=100)
+    f_info.pack(side=tk.LEFT)
+
     def library_list():
+        for widget in f_library.scrollable_frame.winfo_children():
+            widget.destroy()
         for key, mod in library.items():
             if not mod.is_active():
                 mod_widget(f_library.scrollable_frame, mod)
-        f_library.pack(side=tk.LEFT)
 
     def active_list():
+        for widget in f_active.scrollable_frame.winfo_children():
+            widget.destroy()
         active = Mod.get_active_mods()
         for mod in active:
             mod_widget(f_active.scrollable_frame, mod)
-        f_active.pack(side=tk.LEFT)
 
     def mod_widget(_parent, _mod):
-        def activate(event, m):
-            m.activate()
-            event.widget.master.master.destroy()
-            mod_widget(f_active.scrollable_frame, m)
-
-        def deactivate(event, m):
-            m.deactivate()
-            event.widget.master.master.destroy()
-            mod_widget(f_library.scrollable_frame, m)
-
-        def increment(event, m):
-            m.inc_priority()
-            for mod in f_active.scrollable_frame.winfo_children():
-                mod.destroy()
+        def activate():
+            _mod.activate()
+            f_mod.destroy()
             active_list()
 
-        def decrement(event, m):
-            m.dec_priority()
-            for mod in f_active.scrollable_frame.winfo_children():
-                mod.destroy()
+        def deactivate():
+            _mod.deactivate()
+            f_mod.destroy()
+            library_list()
+
+        def increment():
+            _mod.inc_priority()
+            active_list()
+
+        def decrement():
+            _mod.dec_priority()
             active_list()
 
         f_mod = tk.Frame(_parent, width=45, highlightbackground="black", highlightthickness=1)
 
         if _mod.is_active():
             f_actions = tk.Frame(f_mod, width=5)
-            btn_inc = tk.Button(f_actions, width=5, text="^")
-            btn_inc.bind("<Button-1>", lambda event: increment(event, _mod))
-            btn_inc.pack()
-            btn_deactivate = tk.Button(f_actions, width=5, text="<")
-            btn_deactivate.bind("<Button-1>", lambda event: deactivate(event, _mod))
-            btn_deactivate.pack()
-            btn_dec = tk.Button(f_actions, width=5, text="v")
-            btn_dec.bind("<Button-1>", lambda event: decrement(event, _mod))
-            btn_dec.pack()
+            tk.Button(f_actions, width=5, text="^", command=increment).pack()
+            tk.Button(f_actions, width=5, text="<", command=deactivate).pack()
+            tk.Button(f_actions, width=5, text="v", command=decrement).pack()
             f_actions.pack(side=tk.LEFT)
 
         f_data = tk.Frame(f_mod, width=40)
         tk.Label(f_data, width=40, text=f'Mod: {_mod}').pack()
         tk.Label(f_data, width=40, text=f'    Author: {_mod.authors}').pack()
+        f_data.bind("<Button-1>", lambda event: mod_info(event, _mod))
+        for child in f_data.winfo_children():
+            child.bind("<Button-1>", lambda event: mod_info(event, _mod))
         f_data.pack(side=tk.LEFT)
 
         if not _mod.is_active():
             f_actions = tk.Frame(f_mod, width=5)
-            btn_activate = tk.Button(f_actions, width=5, text=">")
-            btn_activate.bind("<Button-1>", lambda event: activate(event, _mod))
-            btn_activate.pack()
+            tk.Button(f_actions, width=5, text=">", command=activate).pack()
             f_actions.pack(side=tk.LEFT)
 
         f_mod.pack()
 
-    f_library = ScrollableFrame(parent, width=50)
-    f_active = ScrollableFrame(parent, width=50)
+    def mod_info(event, _mod):
+        for widget in f_info.winfo_children():
+            widget.destroy()
+        tk.Label(f_info, width=100, text=f'Mod: {_mod}').pack()
+        tk.Label(f_info, width=100, text=f'    Author: {_mod.authors}').pack()
+        tk.Label(f_info, width=100, text=f'    Version: {_mod.version}').pack()
 
-    library_list()
+        tk.Label(f_info, width=100, text='    Website:').pack()
+        l_site = tk.Label(f_info, width=100, fg='Blue', text=_mod.website)
+        l_site.bind('<Button-1>', lambda e: webbrowser.open(_mod.website))
+        l_site.pack(side=tk.LEFT)
+
     active_list()
+    library_list()
 
 
 def gui():
