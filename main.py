@@ -14,13 +14,13 @@ def scan_library():
 def mod_manager(parent):
 
     f_library = ScrollableFrame(parent, width=50)
-    f_library.pack(side=tk.LEFT)
+    f_library.pack(side=tk.LEFT, fill=tk.Y)
 
     f_active = ScrollableFrame(parent, width=50)
-    f_active.pack(side=tk.LEFT)
+    f_active.pack(side=tk.LEFT, fill=tk.Y)
 
     f_info = tk.Frame(parent, width=100)
-    f_info.pack(side=tk.LEFT)
+    f_info.pack(side=tk.LEFT, fill=tk.Y)
 
     def library_list():
         for widget in f_library.scrollable_frame.winfo_children():
@@ -67,9 +67,9 @@ def mod_manager(parent):
         f_data = tk.Frame(f_mod, width=40)
         tk.Label(f_data, width=40, text=f'Mod: {_mod}').pack()
         tk.Label(f_data, width=40, text=f'    Author: {_mod.authors}').pack()
-        f_data.bind("<Button-1>", lambda event: mod_info(event, _mod))
+        f_data.bind("<Button-1>", lambda e: mod_info(_mod))
         for child in f_data.winfo_children():
-            child.bind("<Button-1>", lambda event: mod_info(event, _mod))
+            child.bind("<Button-1>", lambda e: mod_info(_mod))
         f_data.pack(side=tk.LEFT)
 
         if not _mod.is_active():
@@ -79,7 +79,7 @@ def mod_manager(parent):
 
         f_mod.pack()
 
-    def mod_info(event, _mod):
+    def mod_info(_mod):
         for widget in f_info.winfo_children():
             widget.destroy()
         tk.Label(f_info, width=100, text=f'Mod: {_mod}').pack()
@@ -93,6 +93,9 @@ def mod_manager(parent):
 
     active_list()
     library_list()
+    for key, mod in library.items():
+        mod_info(mod)
+        break
 
 
 def gui():
